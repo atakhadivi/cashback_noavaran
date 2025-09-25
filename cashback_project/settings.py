@@ -10,7 +10,7 @@ SECRET_KEY = 'django-insecure-cashback-project-secret-key-123456789'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['192.168.100.121', '192.168.100.1']
 
 # Application definition
 INSTALLED_APPS = [
