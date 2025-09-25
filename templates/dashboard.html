@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load persian_dates %}
+
+{% block title %}داشبورد{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h2 class="mb-4">داشبورد سیستم مدیریت کش‌بک</h2>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card text-white bg-primary">
+            <div class="card-body">
+                <h5 class="card-title">تعداد مشتریان</h5>
+                <p class="card-text display-4">{{ total_customers }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-success">
+            <div class="card-body">
+                <h5 class="card-title">تعداد خریدها</h5>
+                <p class="card-text display-4">{{ total_purchases }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-info">
+            <div class="card-body">
+                <h5 class="card-title">مجموع کش‌بک (ریال)</h5>
+                <p class="card-text display-4">{{ total_cashback|floatformat:0 }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>دسترسی سریع</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'customer_create' %}" class="btn btn-primary">ثبت مشتری جدید</a>
+                    <a href="{% url 'customer_search' %}" class="btn btn-secondary">جستجوی مشتری</a>
+                    <a href="{% url 'purchase_create' %}" class="btn btn-success">ثبت خرید جدید</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>فعالیت‌های اخیر</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    {% for activity in recent_activities %}
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{{ activity.description }}</span>
+                            <small class="text-muted">{{ activity.created_at|persian_datetime }}</small>
+                        </div>
+                        <small class="text-muted">{{ activity.user.get_full_name|default:activity.user.username }}</small>
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item">هیچ فعالیتی ثبت نشده است</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

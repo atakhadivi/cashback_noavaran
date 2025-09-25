@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% load persian_dates %}
+
+{% block title %}جستجوی مشتری{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h2>جستجوی مشتری</h2>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="get" action="{% url 'customer_search' %}">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="mb-3">
+                        <label for="national_code" class="form-label">کد ملی</label>
+                        <input type="text" class="form-control" id="national_code" name="national_code" placeholder="کد ملی 10 رقمی">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">نام</label>
+                        <input type="text" class="form-control" id="name" name="name" placeholder="نام مشتری">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="mb-3">
+                        <label for="last_name" class="form-label">نام خانوادگی</label>
+                        <input type="text" class="form-control" id="last_name" name="last_name" placeholder="نام خانوادگی مشتری">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">شماره تماس</label>
+                        <input type="text" class="form-control" id="phone" name="phone" placeholder="شماره تماس">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 d-flex justify-content-end">
+                    <button type="submit" class="btn btn-primary">جستجو</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if messages %}
+<div class="alerts">
+    {% for message in messages %}
+        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+            {{ message }}
+        </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% if customers %}
+<div class="card mt-4">
+    <div class="card-header">
+        <h5>نتایج جستجو ({{ customers.count }} مشتری یافت شد)</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>نام</th>
+                        <th>نام خانوادگی</th>
+                        <th>کد ملی</th>
+                        <th>شماره تماس</th>
+                        <th>تاریخ ثبت</th>
+                        <th>عملیات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for customer in customers %}
+                    <tr>
+                        <td>{{ customer.first_name }}</td>
+                        <td>{{ customer.last_name }}</td>
+                        <td>{{ customer.national_code }}</td>
+                        <td>{{ customer.phone_number }}</td>
+                        <td>{{ customer.created_at|persian_date }}</td>
+                        <td>
+                            <a href="{% url 'customer_detail' customer.pk %}" class="btn btn-sm btn-primary">مشاهده</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% elif request.GET %}
+<div class="alert alert-warning mt-4">
+    هیچ مشتری مطابق با معیارهای جستجو یافت نشد.
+</div>
+{% endif %}
+
+{% endblock %}

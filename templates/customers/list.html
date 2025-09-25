@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load persian_dates %}
+
+{% block title %}لیست مشتریان{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2>لیست مشتریان</h2>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="{% url 'customer_create' %}" class="btn btn-primary">ثبت مشتری جدید</a>
+        <a href="{% url 'customer_search' %}" class="btn btn-secondary">جستجوی مشتری</a>
+        <a href="{% url 'customer_export_csv' %}" class="btn btn-success">دانلود CSV</a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>نام و نام خانوادگی</th>
+                        <th>کد ملی</th>
+                        <th>شماره موبایل</th>
+                        <th>تاریخ ثبت</th>
+                        <th>موجودی کیف پول (ریال)</th>
+                        <th>عملیات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for customer in customers %}
+                    <tr>
+                        <td>{{ customer.first_name }} {{ customer.last_name }}</td>
+                        <td>{{ customer.national_code }}</td>
+                        <td>{{ customer.phone_number }}</td>
+                        <td>{{ customer.created_at|persian_date }}</td>
+                        <td>{{ customer.wallet_balance|floatformat:0 }}</td>
+                        <td>
+                            <a href="{% url 'customer_detail' pk=customer.pk %}" class="btn btn-sm btn-info">مشاهده</a>
+                            <a href="{% url 'customer_edit' pk=customer.pk %}" class="btn btn-sm btn-warning">ویرایش</a>
+                            <a href="{% url 'purchase_create_for_customer' customer_id=customer.pk %}" class="btn btn-sm btn-success">ثبت خرید</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center">هیچ مشتری ثبت نشده است</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

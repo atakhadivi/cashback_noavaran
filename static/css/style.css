@@ -1,0 +1,88 @@
+/* Custom styles for Cashback Management System */
+
+/* RTL Support */
+body {
+    font-family: 'Vazirmatn', 'Tahoma', sans-serif;
+    text-align: right;
+}
+
+/* Dashboard cards */
+.card {
+    margin-bottom: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    font-weight: bold;
+    background-color: #f8f9fa;
+}
+
+/* Navigation */
+.navbar {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+/* Tables */
+.table th {
+    background-color: #f8f9fa;
+}
+
+/* Forms */
+.form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Footer */
+.footer {
+    margin-top: 50px;
+    padding: 20px 0;
+    background-color: #f8f9fa;
+}
+
+/* Login page */
+.login-container {
+    max-width: 400px;
+    margin: 100px auto;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card-title {
+        font-size: 1.1rem;
+    }
+    
+    .display-4 {
+        font-size: 2rem;
+    }
+}
+
+/* Custom colors for wallet balance */
+.wallet-balance {
+    color: #198754;
+    font-weight: bold;
+}
+
+/* Activity log styling */
+.activity-log-item {
+    border-left: 3px solid #0d6efd;
+    padding-left: 10px;
+    margin-bottom: 10px;
+}
+
+/* Add Vazirmatn font for better RTL support */
+@font-face {
+    font-family: 'Vazirmatn';
+    src: url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/fonts/webfonts/Vazirmatn-Regular.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Vazirmatn';
+    src: url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/fonts/webfonts/Vazirmatn-Bold.woff2') format('woff2');
+    font-weight: bold;
+    font-style: normal;
+}

@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}گزارش های سیستم{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>گزارش های سیستم</h2>
+    <a href="{% url 'report_export_csv' %}" class="btn btn-success mb-3">دانلود گزارش CSV</a>
+    
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center bg-primary text-white">
+                <div class="card-body">
+                    <h5>تعداد کل مشتریان</h5>
+                    <h3>{{ total_customers }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center bg-success text-white">
+                <div class="card-body">
+                    <h5>تعداد کل خریدها</h5>
+                    <h3>{{ total_purchases }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center bg-info text-white">
+                <div class="card-body">
+                    <h5>مجموع کشبک</h5>
+                    <h3>{{ total_cashback|floatformat:0 }} ریال</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center bg-warning text-white">
+                <div class="card-body">
+                    <h5>میانگین کشبک</h5>
+                    <h3>{% if total_purchases %}{{ average_cashback|floatformat:0 }} ریال{% else %}0 ریال{% endif %}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>10 مشتری برتر بر اساس مبلغ خرید</h5>
+                </div>
+                <div class="card-body">
+                    {% if top_customers %}
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>رتبه</th>
+                                <th>نام مشتری</th>
+                                <th>کد ملی</th>
+                                <th>مجموع مبلغ خرید (ریال)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for customer in top_customers %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ customer.first_name }} {{ customer.last_name }}</td>
+                                <td>{{ customer.national_code }}</td>
+                                <td>{{ customer.total_purchase|floatformat:0|default:"0" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <p>هیچ داده ای موجود نیست.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
