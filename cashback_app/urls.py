@@ -19,6 +19,7 @@ urlpatterns = [
     path('customers/create/', views.customer_create, name='customer_create'),
     path('customers/<int:pk>/', views.customer_detail, name='customer_detail'),
     path('customers/<int:pk>/edit/', views.customer_edit, name='customer_edit'),
+    path('customers/<int:pk>/wallet-reduction/', views.wallet_reduction, name='wallet_reduction'),
     path('customers/search/', views.customer_search, name='customer_search'),
     path('customers/export/', views.customer_export_csv, name='customer_export_csv'),
     

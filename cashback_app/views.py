@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.db.models import Q, Sum
 from django.contrib.auth.models import User
 from .models import Customer, Purchase, ActivityLog, UserProfile
-from .forms import CustomerForm, PurchaseForm
+from .forms import CustomerForm, PurchaseForm, WalletReductionForm
 from django.http import HttpResponse
 import csv
 from .auth import OperatorCreationForm
@@ -85,10 +85,11 @@ def customer_create(request):
             customer = form.save()
             
             # Log activity
-            ActivityLog.objects.create(
+            ActivityLog.log_activity(
                 user=request.user,
                 activity_type='customer_create',
                 description=f"مشتری جدید ایجاد شد: {customer.first_name} {customer.last_name}",
+                customer=customer,
                 ip_address=request.META.get('REMOTE_ADDR')
             )
             
@@ -110,10 +111,11 @@ def customer_edit(request, pk):
             customer = form.save()
             
             # Log activity
-            ActivityLog.objects.create(
+            ActivityLog.log_activity(
                 user=request.user,
                 activity_type='customer_edit',
                 description=f"اطلاعات مشتری ویرایش شد: {customer.first_name} {customer.last_name}",
+                customer=customer,
                 ip_address=request.META.get('REMOTE_ADDR')
             )
             
@@ -133,6 +135,41 @@ def customer_detail(request, pk):
     return render(request, 'customers/detail.html', {
         'customer': customer,
         'purchases': purchases
+    })
+
+@login_required
+def wallet_reduction(request, pk):
+    """Reduce customer wallet balance"""
+    customer = get_object_or_404(Customer, pk=pk)
+    
+    if request.method == 'POST':
+        form = WalletReductionForm(request.POST, customer=customer)
+        if form.is_valid():
+            amount = form.cleaned_data['amount']
+            reason = form.cleaned_data['reason']
+            
+            # Reduce wallet balance
+            customer.wallet_balance -= amount
+            customer.save()
+            
+            # Log activity
+            ActivityLog.log_activity(
+                user=request.user,
+                activity_type='wallet_reduction',
+                description=f"کسر از کیف پول: {amount:,} ریال از کیف پول {customer.first_name} {customer.last_name} کسر شد. دلیل: {reason}",
+                customer=customer,
+                ip_address=request.META.get('REMOTE_ADDR')
+            )
+            
+            messages.success(request, f"مبلغ {amount:,} ریال از کیف پول مشتری کسر شد")
+            return redirect('customer_detail', pk=customer.pk)
+    else:
+        form = WalletReductionForm(customer=customer)
+    
+    return render(request, 'customers/wallet_reduction.html', {
+        'form': form,
+        'customer': customer,
+        'title': 'کسر از کیف پول'
     })
 
 @login_required

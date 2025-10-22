@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2>{{ title }}</h2>
+        <p class="text-muted">مشتری: {{ customer.first_name }} {{ customer.last_name }}</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="{% url 'customer_detail' pk=customer.pk %}" class="btn btn-secondary">بازگشت</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>کسر از کیف پول</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <strong>موجودی فعلی کیف پول:</strong> {{ customer.wallet_balance|floatformat:0 }} ریال
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.amount.id_for_label }}" class="form-label">{{ form.amount.label }}</label>
+                        {{ form.amount }}
+                        {% if form.amount.errors %}
+                            <div class="text-danger">
+                                {% for error in form.amount.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.reason.id_for_label }}" class="form-label">{{ form.reason.label }}</label>
+                        {{ form.reason }}
+                        {% if form.reason.errors %}
+                            <div class="text-danger">
+                                {% for error in form.reason.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>توجه:</strong> این عملیات قابل بازگشت نیست. لطفاً از صحت اطلاعات وارد شده اطمینان حاصل کنید.
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{% url 'customer_detail' pk=customer.pk %}" class="btn btn-secondary me-md-2">انصراف</a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-minus-circle"></i> کسر از کیف پول
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>اطلاعات مشتری</h5>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <tr>
+                        <th>نام و نام خانوادگی:</th>
+                        <td>{{ customer.first_name }} {{ customer.last_name }}</td>
+                    </tr>
+                    <tr>
+                        <th>کد ملی:</th>
+                        <td>{{ customer.national_code }}</td>
+                    </tr>
+                    <tr>
+                        <th>شماره موبایل:</th>
+                        <td>{{ customer.phone_number }}</td>
+                    </tr>
+                    <tr>
+                        <th>موجودی کیف پول:</th>
+                        <td class="text-success">{{ customer.wallet_balance|floatformat:0 }} ریال</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

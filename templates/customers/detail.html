@@ -53,6 +53,13 @@
                 <div class="text-center">
                     <h3>موجودی کیف پول</h3>
                     <p class="display-4 text-success">{{ customer.wallet_balance|floatformat:0 }} ریال</p>
+                    {% if customer.wallet_balance > 0 %}
+                    <div class="mt-3">
+                        <a href="{% url 'wallet_reduction' pk=customer.pk %}" class="btn btn-danger">
+                            <i class="fas fa-minus-circle"></i> کسر از کیف پول
+                        </a>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>

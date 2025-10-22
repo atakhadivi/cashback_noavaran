@@ -131,6 +131,13 @@ class ActivityLog(models.Model):
         verbose_name="نوع فعالیت"
     )
     description = models.TextField(verbose_name="توضیحات")
+    customer = models.ForeignKey(
+        'Customer',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="مشتری مرتبط"
+    )
     ip_address = models.GenericIPAddressField(
         null=True, 
         blank=True,
@@ -140,6 +147,27 @@ class ActivityLog(models.Model):
     
     def __str__(self):
         return f"{self.user.username} - {self.get_activity_type_display()} - {self.created_at.strftime('%Y-%m-%d %H:%M')}"
+    
+    @classmethod
+    def cleanup_old_logs(cls):
+        """Remove logs older than 6 months"""
+        from django.utils import timezone
+        from datetime import timedelta
+        
+        six_months_ago = timezone.now() - timedelta(days=180)
+        deleted_count = cls.objects.filter(created_at__lt=six_months_ago).delete()[0]
+        return deleted_count
+    
+    @classmethod
+    def log_activity(cls, user, activity_type, description, customer=None, ip_address=None):
+        """Helper method to create activity logs"""
+        return cls.objects.create(
+            user=user,
+            activity_type=activity_type,
+            description=description,
+            customer=customer,
+            ip_address=ip_address
+        )
     
     class Meta:
         verbose_name = "گزارش فعالیت"
