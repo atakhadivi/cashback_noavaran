@@ -1,4 +1,5 @@
 from django import forms
+import re
 from .models import Customer, Purchase
 
 class CustomerForm(forms.ModelForm):
@@ -11,6 +12,28 @@ class CustomerForm(forms.ModelForm):
             'national_code': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'کد ملی - 10 رقم'}),
             'phone_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'شماره موبایل - مثال: 09123456789'}),
         }
+
+    def clean_national_code(self):
+        """Validate Iranian national code using the model's algorithm and provide a user-friendly error on the form."""
+        value = self.cleaned_data.get('national_code', '')
+        # Normalize digits (supports Persian/Arabic-Indic) and strip non-digits
+        value = Customer.normalize_national_code((value or '').strip())
+        if not Customer.is_valid_national_code(value):
+            raise forms.ValidationError('کد ملی باید دقیقاً 10 رقم باشد')
+        return value
+
+    def clean_phone_number(self):
+        """Normalize Persian/Arabic digits in phone number to ASCII and validate basic pattern."""
+        value = self.cleaned_data.get('phone_number', '')
+        # Translate digits similar to national code
+        trans = str.maketrans('۰۱۲۳۴۵۶۷۸۹٠١٢٣٤٥٦٧٨٩', '01234567890123456789')
+        value = str((value or '').strip()).translate(trans)
+        # Remove spaces/dashes if any
+        value = re.sub(r'[^0-9]', '', value)
+        # Ensure it follows 09XXXXXXXXX format
+        if not re.match(r'^09\d{9}$', value):
+            raise forms.ValidationError('شماره موبایل باید با 09 شروع شود و 11 رقم باشد')
+        return value
 
 class PurchaseForm(forms.ModelForm):
     class Meta:

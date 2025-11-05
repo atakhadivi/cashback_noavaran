@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load currency %}
 
 {% block title %}گزارش های سیستم{% endblock %}
 
@@ -28,7 +29,7 @@
             <div class="card text-center bg-info text-white">
                 <div class="card-body">
                     <h5>مجموع کشبک</h5>
-                    <h3>{{ total_cashback|floatformat:0 }} ریال</h3>
+                    <h3>{{ total_cashback|price }} ریال</h3>
                 </div>
             </div>
         </div>
@@ -36,7 +37,7 @@
             <div class="card text-center bg-warning text-white">
                 <div class="card-body">
                     <h5>میانگین کشبک</h5>
-                    <h3>{% if total_purchases %}{{ average_cashback|floatformat:0 }} ریال{% else %}0 ریال{% endif %}</h3>
+                    <h3>{% if total_purchases %}{{ average_cashback|price }} ریال{% else %}0 ریال{% endif %}</h3>
                 </div>
             </div>
         </div>
@@ -65,7 +66,7 @@
                                 <td>{{ forloop.counter }}</td>
                                 <td>{{ customer.first_name }} {{ customer.last_name }}</td>
                                 <td>{{ customer.national_code }}</td>
-                                <td>{{ customer.total_purchase|floatformat:0|default:"0" }}</td>
+                                <td>{{ customer.total_purchase|default:0|price }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>

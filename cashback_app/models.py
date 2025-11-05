@@ -27,6 +27,13 @@ class Customer(models.Model):
             ),
         ]
     )
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="ثبت کننده"
+    )
     wallet_balance = models.DecimalField(
         max_digits=12, 
         decimal_places=0, 
@@ -40,25 +47,33 @@ class Customer(models.Model):
         return f"{self.first_name} {self.last_name} - {self.national_code}"
     
     def save(self, *args, **kwargs):
-        # Validate national code
+        # Normalize and validate national code
+        self.national_code = Customer.normalize_national_code(self.national_code)
         if not self.is_valid_national_code(self.national_code):
             from django.core.exceptions import ValidationError
-            raise ValidationError("کد ملی وارد شده معتبر نیست")
+            raise ValidationError("کد ملی باید دقیقاً 10 رقم باشد")
         super().save(*args, **kwargs)
     
     @staticmethod
+    def normalize_national_code(national_code: str) -> str:
+        """Convert Persian/Arabic-Indic digits to ASCII and strip non-digit chars."""
+        if national_code is None:
+            return ''
+        # Map Persian (۰-۹) and Arabic-Indic (٠-٩) digits to ASCII (0-9)
+        trans = str.maketrans(
+            '۰۱۲۳۴۵۶۷۸۹٠١٢٣٤٥٦٧٨٩',
+            '01234567890123456789'
+        )
+        normalized = str(national_code).translate(trans)
+        # Remove any non-digit characters (spaces, dashes, etc.)
+        normalized = re.sub(r'\D', '', normalized)
+        return normalized
+
+    @staticmethod
     def is_valid_national_code(national_code):
-        if not re.match(r'^\d{10}$', national_code):
-            return False
-        
-        # Check if all digits are the same
-        if len(set(national_code)) == 1:
-            return False
-        
-        # Iranian National Code validation algorithm
-        check = int(national_code[9])
-        s = sum(int(national_code[i]) * (10 - i) for i in range(9)) % 11
-        return (s < 2 and check == s) or (s >= 2 and check == 11 - s)
+        """Validate national code as exactly 10 digits after normalization."""
+        national_code = Customer.normalize_national_code(national_code)
+        return bool(re.match(r'^\d{10}$', national_code))
     
     class Meta:
         verbose_name = "مشتری"

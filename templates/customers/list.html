@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load persian_dates %}
+{% load currency %}
 
 {% block title %}لیست مشتریان{% endblock %}
 
@@ -25,7 +26,12 @@
                         <th>کد ملی</th>
                         <th>شماره موبایل</th>
                         <th>تاریخ ثبت</th>
-                        <th>موجودی کیف پول (ریال)</th>
+                        <th>ثبت کننده</th>
+                        <th>
+                            موجودی کیف پول (ریال)
+                            <a href="{% url 'customer_list' %}?sort=wallet&dir=asc" class="btn btn-sm btn-link" title="مرتب‌سازی صعودی">↑</a>
+                            <a href="{% url 'customer_list' %}?sort=wallet&dir=desc" class="btn btn-sm btn-link" title="مرتب‌سازی نزولی">↓</a>
+                        </th>
                         <th>عملیات</th>
                     </tr>
                 </thead>
@@ -36,7 +42,8 @@
                         <td>{{ customer.national_code }}</td>
                         <td>{{ customer.phone_number }}</td>
                         <td>{{ customer.created_at|persian_date }}</td>
-                        <td>{{ customer.wallet_balance|floatformat:0 }}</td>
+                        <td>{{ customer.created_by.get_username|default:"-" }}</td>
+                        <td>{{ customer.wallet_balance|price }}</td>
                         <td>
                             <a href="{% url 'customer_detail' pk=customer.pk %}" class="btn btn-sm btn-info">مشاهده</a>
                             <a href="{% url 'customer_edit' pk=customer.pk %}" class="btn btn-sm btn-warning">ویرایش</a>
@@ -45,7 +52,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="6" class="text-center">هیچ مشتری ثبت نشده است</td>
+                        <td colspan="7" class="text-center">هیچ مشتری ثبت نشده است</td>
                     </tr>
                     {% endfor %}
                 </tbody>

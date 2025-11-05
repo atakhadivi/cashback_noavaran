@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from .models import Customer, Purchase, ActivityLog, UserProfile
 from .forms import CustomerForm, PurchaseForm, WalletReductionForm
 from django.http import HttpResponse
+from django.core.exceptions import ValidationError
 import csv
 from .auth import OperatorCreationForm
 
@@ -57,8 +58,22 @@ def dashboard(request):
 @login_required
 def customer_list(request):
     """List all customers"""
-    customers = Customer.objects.all()
-    return render(request, 'customers/list.html', {'customers': customers})
+    # Support sorting by wallet balance
+    sort = request.GET.get('sort')
+    direction = request.GET.get('dir', 'desc')
+
+    customers_qs = Customer.objects.all()
+
+    if sort == 'wallet':
+        order_field = 'wallet_balance' if direction == 'asc' else '-wallet_balance'
+        customers_qs = customers_qs.order_by(order_field)
+
+    context = {
+        'customers': customers_qs,
+        'current_sort': sort or '',
+        'current_dir': direction,
+    }
+    return render(request, 'customers/list.html', context)
 
 @login_required
 def customer_export_csv(request):
@@ -82,19 +97,27 @@ def customer_create(request):
     if request.method == 'POST':
         form = CustomerForm(request.POST)
         if form.is_valid():
-            customer = form.save()
-            
-            # Log activity
-            ActivityLog.log_activity(
-                user=request.user,
-                activity_type='customer_create',
-                description=f"مشتری جدید ایجاد شد: {customer.first_name} {customer.last_name}",
-                customer=customer,
-                ip_address=request.META.get('REMOTE_ADDR')
-            )
-            
-            messages.success(request, "مشتری با موفقیت ثبت شد")
-            return redirect('customer_detail', pk=customer.pk)
+            customer = form.save(commit=False)
+            customer.created_by = request.user
+            # Save with defensive error handling in case model-level validation fails
+            try:
+                customer.save()
+            except ValidationError as e:
+                # Attach error to form so it renders nicely instead of a server error
+                message = e.messages[0] if getattr(e, 'messages', None) else str(e)
+                form.add_error('national_code', message)
+                # Fall through to final render with form errors
+            else:
+                # Log activity
+                ActivityLog.log_activity(
+                    user=request.user,
+                    activity_type='customer_create',
+                    description=f"مشتری جدید ایجاد شد: {customer.first_name} {customer.last_name}",
+                    customer=customer,
+                    ip_address=request.META.get('REMOTE_ADDR')
+                )
+                messages.success(request, "مشتری با موفقیت ثبت شد")
+                return redirect('customer_detail', pk=customer.pk)
     else:
         form = CustomerForm()
     
@@ -181,8 +204,10 @@ def customer_search(request):
     phone = request.GET.get('phone', '')
     
     if national_code:
+        # Normalize Persian/Arabic digits and strip non-digit characters
+        national_code_normalized = Customer.normalize_national_code(national_code)
         try:
-            customer = Customer.objects.get(national_code=national_code)
+            customer = Customer.objects.get(national_code=national_code_normalized)
             return redirect('customer_detail', pk=customer.pk)
         except Customer.DoesNotExist:
             messages.error(request, "مشتری با این کد ملی یافت نشد")
@@ -228,11 +253,11 @@ def purchase_create(request, customer_id=None):
             ActivityLog.objects.create(
                 user=request.user,
                 activity_type='purchase_create',
-                description=f"خرید جدید ثبت شد برای مشتری: {purchase.customer.first_name} {purchase.customer.last_name} به مبلغ {purchase.amount}",
+                description=f"خرید جدید ثبت شد برای مشتری: {purchase.customer.first_name} {purchase.customer.last_name} به مبلغ {int(purchase.amount):,} ریال",
                 ip_address=request.META.get('REMOTE_ADDR')
             )
             
-            messages.success(request, f"خرید با موفقیت ثبت شد. مبلغ {purchase.cashback_amount} ریال به کیف پول مشتری اضافه شد")
+            messages.success(request, f"خرید با موفقیت ثبت شد. مبلغ {int(purchase.cashback_amount):,} ریال به کیف پول مشتری اضافه شد")
             return redirect('customer_detail', pk=purchase.customer.pk)
         # If invalid, the form with errors will be rendered below
     else:

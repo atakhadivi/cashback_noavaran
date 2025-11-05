@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load persian_dates %}
+{% load currency %}
 
 {% block title %}داشبورد{% endblock %}
 
@@ -31,7 +32,7 @@
         <div class="card text-white bg-info">
             <div class="card-body">
                 <h5 class="card-title">مجموع کش‌بک (ریال)</h5>
-                <p class="card-text display-4">{{ total_cashback|floatformat:0 }}</p>
+                <p class="card-text display-4">{{ total_cashback|price }}</p>
             </div>
         </div>
     </div>

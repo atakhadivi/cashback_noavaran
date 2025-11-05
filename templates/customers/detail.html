@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load persian_dates %}
+{% load currency %}
 
 {% block title %}مشاهده اطلاعات مشتری{% endblock %}
 
@@ -52,7 +53,7 @@
             <div class="card-body">
                 <div class="text-center">
                     <h3>موجودی کیف پول</h3>
-                    <p class="display-4 text-success">{{ customer.wallet_balance|floatformat:0 }} ریال</p>
+                    <p class="display-4 text-success">{{ customer.wallet_balance|price }} ریال</p>
                     {% if customer.wallet_balance > 0 %}
                     <div class="mt-3">
                         <a href="{% url 'wallet_reduction' pk=customer.pk %}" class="btn btn-danger">
@@ -86,8 +87,8 @@
                     {% for purchase in purchases %}
                     <tr>
                         <td>{{ purchase.created_at|persian_datetime }}</td>
-                        <td>{{ purchase.amount|floatformat:0 }}</td>
-                        <td>{{ purchase.cashback_amount|floatformat:0 }}</td>
+                        <td>{{ purchase.amount|price }}</td>
+                        <td>{{ purchase.cashback_amount|price }}</td>
                         <td>{{ purchase.created_by.get_full_name|default:purchase.created_by.username }}</td>
                     </tr>
                     {% empty %}
